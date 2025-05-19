@@ -4,11 +4,12 @@
 package echo
 
 import (
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 // Note this test is deliberately simple as there's not a lot to test.
@@ -96,5 +97,23 @@ func TestDefaultJSONCodec_Decode(t *testing.T) {
 	err = enc.Deserialize(c, &userUnmarshalTypeError)
 	assert.IsType(t, &HTTPError{}, err)
 	assert.EqualError(t, err, "code=400, message=Unmarshal type error: expected=string, got=number, field=id, offset=7, internal=json: cannot unmarshal number into Go struct field .id of type string")
+
+	var userUnknownField = user{}
+	req = httptest.NewRequest(http.MethodPost, "/", strings.NewReader(userJSONUnknownField))
+	rec = httptest.NewRecorder()
+	c = e.NewContext(req, rec).(*context)
+	err = enc.Deserialize(c, &userUnknownField)
+	if assert.NoError(t, err) {
+		assert.Equal(t, userUnknownField, user{ID: 1, Name: "Jon Snow"})
+	}
+
+	enc.Strict = true
+	var userUnknownFieldError = user{}
+	req = httptest.NewRequest(http.MethodPost, "/", strings.NewReader(userJSONUnknownField))
+	rec = httptest.NewRecorder()
+	c = e.NewContext(req, rec).(*context)
+	err = enc.Deserialize(c, &userUnknownFieldError)
+	assert.IsType(t, &HTTPError{}, err)
+	assert.EqualError(t, err, "code=400, message=Unknown field error: error=json: unknown field \"house\", internal=json: unknown field \"house\"")
 
 }

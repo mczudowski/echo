@@ -37,6 +37,7 @@ const (
 	userForm                    = `id=1&name=Jon Snow`
 	invalidContent              = "invalid content"
 	userJSONInvalidType         = `{"id":"1","name":"Jon Snow"}`
+	userJSONUnknownField        = `{"id":1,"name":"Jon Snow","house":"Targaryen"}`
 	userXMLConvertNumberError   = `<user><id>Number one</id><name>Jon Snow</name></user>`
 	userXMLUnsupportedTypeError = `<user><>Number one</><name>Jon Snow</name></user>`
 )
